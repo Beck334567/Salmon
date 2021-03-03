@@ -51,7 +51,6 @@ namespace Salmon.Pages
                 }).OrderByDescending(x => x.Rating)
                   .ThenByDescending(x => x.UserRatingsTotal);
 
-                
                 return new JsonResult(result);
             }
             catch (HttpRequestException exception)
