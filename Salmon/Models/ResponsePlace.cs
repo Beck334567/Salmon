@@ -17,17 +17,6 @@ namespace Salmon.Models
         [JsonProperty("status")]
         public string Status { get; set; }
 
-        [JsonProperty("opening_hours")]
-        public Opening_hour OpeningHours { get; set; }
-
-        [JsonProperty("types")]
-        public List<string> PlaceTypes { get; set; }
-
-        [JsonProperty("user_ratings_total")]
-        public string UserRatingsTotal { get; set; }
-
-        [JsonProperty("vicinity ")]
-        public string Vicinity { get; set; }
     }
 
     public class Result
@@ -40,6 +29,19 @@ namespace Salmon.Models
 
         [JsonProperty("rating")]
         public string Rating { get; set; }
+
+        [JsonProperty("user_ratings_total")]
+        public string UserRatingsTotal { get; set; }
+
+        [JsonProperty("opening_hours")]
+        public Opening_hour OpeningHours { get; set; }
+
+        [JsonProperty("vicinity")]
+        public string Vicinity { get; set; }
+
+        [JsonProperty("types")]
+        public List<string> PlaceTypes { get; set; }
+
     }
 
     public class Opening_hour

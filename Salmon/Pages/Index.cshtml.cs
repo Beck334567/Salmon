@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Salmon.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -29,37 +31,36 @@ namespace Salmon.Pages
         {
             //TODO add other's fields to select
             var basicApiUrl = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?key={0}", _key);
-            var nearbySearchApiUrl = basicApiUrl + "&" + string.Format("location={0},{1}&radius={2}&keyword={3}", requestPlace.Location.Latitude, requestPlace.Location.Longitude, requestPlace.Radius, requestPlace.Name);
+            var nearbySearchApiUrl = basicApiUrl + "&" + string.Format("location={0},{1}&radius={2}&keyword={3}&language=zh-TW", requestPlace.Location.Latitude, requestPlace.Location.Longitude, requestPlace.Radius, requestPlace.Name);
 
-            
             try
             {
                 HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
                 HttpResponseMessage responseMessage = await myAppHTTPClient.PostAsync(nearbySearchApiUrl, httpRequestMessage.Content);
                 HttpContent content = responseMessage.Content;
                 var response = await content.ReadAsStringAsync();
-
-
                 var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response);
-                var searchResult = "";
-
-                foreach (var item in responsePlace.Results)
+                
+                var result = responsePlace.Results.Where(x => Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)).Select(x => new
                 {
-                    if (Convert.ToDecimal(item.Rating) >= Convert.ToDecimal(requestPlace.Rating))
-                    {
-                        searchResult += "店名" + item.Name + "分數" + item.Rating;
-                    }
-                }
-                return Content(searchResult);
+                    x.Name,
+                    x.Rating,
+                    x.PlaceId,
+                    x.UserRatingsTotal,
+                    x.Vicinity
+                }).OrderByDescending(x => x.Rating)
+                  .ThenByDescending(x => x.UserRatingsTotal);
+
+                
+                return new JsonResult(result);
             }
             catch (HttpRequestException exception)
             {
                 Console.WriteLine("An HTTP request exception occurred. {0}", exception.Message);
             }
 
-
-
             return Content(nearbySearchApiUrl);
         }
+
     }
 }

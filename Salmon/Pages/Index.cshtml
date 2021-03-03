@@ -2,7 +2,6 @@
 @using Salmon.Models
 @model IndexModel
 
-
 @{
     ViewData["Title"] = "Home page";
     Layout = null;
@@ -39,16 +38,14 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8AdwlyUEKwmtWK8K9pS3_mcyUWeSfPek&callback=initMap&libraries=&v=weekly" async></script>
 </body>
 
-
 <script>
     var map, marker, lat, lng;
-    
+
     function initMap() {
 
         navigator.geolocation.getCurrentPosition((position) => {
             lat = position.coords.latitude;
             lng = position.coords.longitude;
-            // 初始化地圖
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 14,
                 center: { lat: lat, lng: lng }
@@ -62,7 +59,6 @@
 
     var output = document.getElementById("out");
     output.innerHTML = '<p>Latitude is : ' + position.coords.latitude + '° <br>Longitude is : ' + position.coords.longitude + '°</p>';
-
 </script>
 
 <script>
@@ -79,17 +75,22 @@
                     $('input:hidden[name="__RequestVerificationToken"]').val());
             },
             success: function (result) {
-                //var resultoutput = document.getElementById("searchResult");
-                //resultoutput.innerHTML='<p>'+ result.Name +'</p>';
-                alert(result);
-                
+                var searchResults = document.getElementById("searchResult");
+
+                var info = "";
+
+                result.forEach(function (item) {
+
+                    info += `Name : ${item.name}<br>
+                             Rating : ${item.rating}<br>
+                             UserRatingsTotal : ${item.userRatingsTotal}<br>
+                             Vicinity : ${item.vicinity} <br><br>`
+
+                });
+
+                searchResults.innerHTML = '<p>' + info + '</p>';
+
             }
         });
     }
 </script>
-
-
-
-
-
-
