@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Salmon.Models
 {
-    public class PlaceDetail
+    public class RequestPlaceDetail
     {
     }
 }

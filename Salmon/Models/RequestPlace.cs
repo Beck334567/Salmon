@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,7 +18,9 @@ namespace Salmon.Models
     }
     public class Location
     {
+        [JsonProperty("lat")]
         public string Latitude { get; set; }
+        [JsonProperty("lng")]
         public string Longitude { get; set; }
     }
 }

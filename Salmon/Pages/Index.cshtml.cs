@@ -26,9 +26,27 @@ namespace Salmon.Pages
         {
         }
 
-        public IActionResult OnPostSearchDetail(string placeId)
+        public async Task<IActionResult> OnPostSearchDetailAsync(string placeId)
         {
+            //Todo : Let fields can be selected
+            var basicApiUrl = string.Format("https://maps.googleapis.com/maps/api/place/details/json?key={0}&", _key);
+            var placeDetailApiUrl = basicApiUrl + "&" + string.Format("place_id={0}&fields={1}", placeId, "name,reviews,rating,website,formatted_phone_number");
+            try
+            {
+                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+                HttpResponseMessage responseMessage = await myAppHTTPClient.PostAsync(placeDetailApiUrl, httpRequestMessage.Content);
+                HttpContent content = responseMessage.Content;
+                var response = await content.ReadAsStringAsync();
+                var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response);
 
+               
+
+                return new JsonResult(responsePlaceDetail);
+            }
+            catch (HttpRequestException exception)
+            {
+                Console.WriteLine("An HTTP request exception occurred. {0}", exception.Message);
+            }
             return Content(placeId);
         }
 

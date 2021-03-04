@@ -34,7 +34,7 @@ namespace Salmon.Models
         public string UserRatingsTotal { get; set; }
 
         [JsonProperty("opening_hours")]
-        public Opening_hour OpeningHours { get; set; }
+        public OpeningHour OpeningHours { get; set; }
 
         [JsonProperty("vicinity")]
         public string Vicinity { get; set; }
@@ -44,9 +44,34 @@ namespace Salmon.Models
 
     }
 
-    public class Opening_hour
+    public class OpeningHour
     {
         [JsonProperty("open_now")]
         public bool OpenNow { get; set; }
+        [JsonProperty("periods")]
+        public List<Period> Periods { get; set; }
+        
+    }
+    public class Period
+    {
+        [JsonProperty("close")]
+        public Close CloseTime { get; set; }
+        [JsonProperty("open")]
+        public Open OpenTime { get; set; }
+
+        public class Close
+        {
+            [JsonProperty("day")]
+            public decimal day { get; set; }
+            [JsonProperty("time")]
+            public bool time { get; set; }
+        }
+        public class Open
+        {
+            [JsonProperty("day")]
+            public decimal day { get; set; }
+            [JsonProperty("time")]
+            public bool time { get; set; }
+        }
     }
 }
