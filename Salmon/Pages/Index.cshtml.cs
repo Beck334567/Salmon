@@ -26,6 +26,12 @@ namespace Salmon.Pages
         {
         }
 
+        public IActionResult OnPostSearchDetail(string placeId)
+        {
+
+            return Content(placeId);
+        }
+
         //Index?handler=SearchItem
         public async Task<IActionResult> OnPostSearchItemAsync(RequestPlace requestPlace)
         {

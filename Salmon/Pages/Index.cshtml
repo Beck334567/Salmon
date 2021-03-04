@@ -29,7 +29,7 @@
         分數 :
         <input placeholder="4" id="searchRating" value="" required />
         <br />
-        <input type="button" value="Submit" onclick="AjaxCall()">
+        <input type="button" value="Submit" onclick="ajaxCall()">
     </form>
 
     <div id="out"></div>
@@ -65,7 +65,7 @@
 </script>
 
 <script>
-    function AjaxCall() {
+    function ajaxCall() {
         var Location = { Latitude: latitude, Longitude: longitude };
         var searchItem = { Name: document.getElementById('searchName').value, Radius: document.getElementById('searchRadius').value, Location: Location, Rating: document.getElementById('searchRating').value };
 
@@ -83,15 +83,33 @@
                 var info = "";
 
                 result.forEach(function (item) {
-
+                    
                     info += `Name : ${item.name}<br>
                              Rating : ${item.rating}<br>
                              UserRatingsTotal : ${item.userRatingsTotal}<br>
-                             Vicinity : ${item.vicinity} <br><br>`
+                             <span style="display:none">PlaceId : ${item.placeId}</span>
+                             Vicinity : ${item.vicinity}  <input type="button" value="Search" onclick="searchDetail('${item.placeId}')"><br><br>`;
 
                 });
 
                 searchResults.innerHTML = '<p>' + info + '</p>';
+
+            }
+        });
+    }
+
+    function searchDetail(placeId) {
+        console.log(placeId);
+        $.ajax({
+            type: "post",
+            url: "Index?handler=SearchDetail",
+            data: { placeId: placeId },
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            success: function (result) {
+                alert(placeId);
 
             }
         });
