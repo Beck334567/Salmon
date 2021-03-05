@@ -27,9 +27,14 @@
         <input placeholder="500" type="number" id="searchRadius" value="" required="required" />
         <br />
         分數 :
-        <input placeholder="4" type="number" id="searchRating" value="" required="required" min="1"max="5" />
+        <input placeholder="4" type="number" id="searchRating" value="" required="required" min="1" max="5" />
         <br />
-        <input type="button" value="Submit" onclick="ajaxCall()">
+        評論人數 :
+        <input placeholder="4" type="number" id="searchUserRatingsTotal" value="" required="required" min="1"  />
+        <br />
+        <input type="button" value="Search" onclick="searchItem(false)">
+        <br />
+        <input type="button" value="RandomSelect" onclick="searchItem(true)">
     </form>
 
     <div id="out"></div>
@@ -48,9 +53,9 @@
             longitude = position.coords.longitude;
 
             map = new google.maps.Map(document.getElementById('map'),
-            {
-                zoom: 14,
-                center: { lat: latitude, lng: longitude }
+                {
+                    zoom: 14,
+                    center: { lat: latitude, lng: longitude }
                 });
 
             var output = document.getElementById("out");
@@ -62,29 +67,28 @@
             });
         });
     }
-
 </script>
 
 <script>
-    function ajaxCall() {
-        var Location = { Latitude: latitude, Longitude: longitude };
-        var searchItem = { Name: document.getElementById('searchName').value, Radius: document.getElementById('searchRadius').value, Location: Location, Rating: document.getElementById('searchRating').value };
+    function searchItem(isRandomSelect) {
+        var location = { Latitude: latitude, Longitude: longitude };
+        var searchItems = { UserRatingsTotal: document.getElementById('searchUserRatingsTotal').value,Name: document.getElementById('searchName').value, Radius: document.getElementById('searchRadius').value, Location: location, Rating: document.getElementById('searchRating').value };
 
         $.ajax({
             type: "post",
             url: "Index?handler=SearchItem",
-            data: { requestPlace: searchItem },
-            beforeSend: function (xhr) {
+            data: { requestPlace: searchItems, isRandomSelect: isRandomSelect },
+            beforeSend: function(xhr) {
                 xhr.setRequestHeader("X-CSRF-TOKEN",
                     $('input:hidden[name="__RequestVerificationToken"]').val());
             },
-            success: function (result) {
+            success: function(result) {
                 var searchResults = document.getElementById("searchResult");
 
                 var info = "";
 
-                result.forEach(function (item) {
-                    
+                result.forEach(function(item) {
+
                     info += `Name : ${item.name}<br>
                              Rating : ${item.rating}<br>
                              UserRatingsTotal : ${item.userRatingsTotal}<br>
@@ -94,7 +98,6 @@
                 });
 
                 searchResults.innerHTML = '<p>' + info + '</p>';
-
             }
         });
     }

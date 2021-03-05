@@ -14,8 +14,7 @@ namespace Salmon.Pages
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
-        private static readonly string _key = "AIzaSyA8AdwlyUEKwmtWK8K9pS3_mcyUWeSfPek";
-        private static HttpClient myAppHTTPClient = new HttpClient();
+        private const string Key = "AIzaSyA8AdwlyUEKwmtWK8K9pS3_mcyUWeSfPek";
 
         public IndexModel(ILogger<IndexModel> logger)
         {
@@ -26,21 +25,18 @@ namespace Salmon.Pages
         {
         }
 
-        public async Task<IActionResult> OnPostSearchDetailAsync(string placeId)
+        //Index?handler=SearchDetail
+        public IActionResult OnPostSearchDetail(string placeId)
         {
             //Todo : Let fields can be selected
-            var basicApiUrl = string.Format("https://maps.googleapis.com/maps/api/place/details/json?key={0}&", _key);
-            var placeDetailApiUrl = basicApiUrl + "&" + string.Format("place_id={0}&fields={1}",
-                placeId, "name,reviews,rating,website,formatted_phone_number");
+            var basicApiUrl = $"https://maps.googleapis.com/maps/api/place/details/json?key={Key}&";
+            var placeDetailApiUrl = basicApiUrl + "&" +
+                                    $"place_id={placeId}&fields=name,reviews,rating,website,formatted_phone_number";
             try
             {
-               
-
-                
                 var response = CallGoogleMapAsync(placeDetailApiUrl);
                 var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response.Result);
 
-              
                 return new JsonResult(responsePlaceDetail.Result.Reviews);
             }
             catch (HttpRequestException exception)
@@ -50,42 +46,39 @@ namespace Salmon.Pages
             return Content(placeId);
         }
 
-        private async Task<string> CallGoogleMapAsync(string googleApi)
-        {
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-            HttpResponseMessage responseMessage = await myAppHTTPClient.PostAsync(googleApi, httpRequestMessage.Content);
-            HttpContent content = responseMessage.Content;
-            var response = content.ReadAsStringAsync();
-            return await response;
-        }
-
         //Index?handler=SearchItem
-        public async Task<IActionResult> OnPostSearchItemAsync(RequestPlace requestPlace)
+        public IActionResult OnPostSearchItem(RequestPlace requestPlace, bool isRandomSelect)
         {
             //TODO add other's fields to select
-            var basicApiUrl = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?key={0}", _key);
-            var nearbySearchApiUrl = basicApiUrl + "&" + string.Format("location={0},{1}&radius={2}&keyword={3}&language=zh-TW",
-                requestPlace.Location.Latitude, requestPlace.Location.Longitude, requestPlace.Radius, requestPlace.Name);
+            var basicApiUrl = $"https://maps.googleapis.com/maps/api/place/nearbysearch/json?key={Key}";
+            var nearbySearchApiUrl = basicApiUrl + "&" +
+                                     $"location={requestPlace.Location.Latitude},{requestPlace.Location.Longitude}&radius={requestPlace.Radius}&keyword={requestPlace.Name}&language=zh-TW";
 
             try
             {
-                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-                HttpResponseMessage responseMessage = await myAppHTTPClient.PostAsync(nearbySearchApiUrl, httpRequestMessage.Content);
-                HttpContent content = responseMessage.Content;
-                var response = await content.ReadAsStringAsync();
-                var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response);
-                
+                var response = CallGoogleMapAsync(nearbySearchApiUrl);
+                var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response.Result);
+
                 var result = responsePlace.Results
-                    .Where(x => Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating))
-                    .Select(x => new
+                            .Where(x => (Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)) && (Convert.ToDecimal(x.UserRatingsTotal) >= Convert.ToDecimal(requestPlace.UserRatingsTotal)))
+                            .Select(x => new
+                            {
+                                x.Name,
+                                x.Rating,
+                                x.PlaceId,
+                                x.UserRatingsTotal,
+                                x.Vicinity
+                            }).OrderByDescending(x => x.Rating)
+                          .ThenByDescending(x => x.UserRatingsTotal);
+                if (isRandomSelect)
                 {
-                    x.Name,
-                    x.Rating,
-                    x.PlaceId,
-                    x.UserRatingsTotal,
-                    x.Vicinity
-                }).OrderByDescending(x => x.Rating)
-                  .ThenByDescending(x => x.UserRatingsTotal);
+                    var a = responsePlace.Results.Where(x =>
+                        Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)).ToList();
+                    var b = RandomSelect(a);
+                    var c = new List<Result>();
+                    c.Add(b);
+                    return new JsonResult(c);
+                }
 
                 return new JsonResult(result);
             }
@@ -97,5 +90,22 @@ namespace Salmon.Pages
             return Content(nearbySearchApiUrl);
         }
 
+        private async Task<string> CallGoogleMapAsync(string googleApi)
+        {
+            HttpClient myAppHTTPClient = new HttpClient();
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            HttpResponseMessage responseMessage = await myAppHTTPClient.PostAsync(googleApi, httpRequestMessage.Content);
+            HttpContent content = responseMessage.Content;
+            var response = content.ReadAsStringAsync();
+            return await response;
+        }
+
+        public T RandomSelect<T>(List<T> list)
+        {
+            Random random = new Random();
+            int number = random.Next(list.Count);
+            var result = list[number];
+            return result;
+        }
     }
 }
