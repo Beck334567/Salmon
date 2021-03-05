@@ -46,7 +46,13 @@
 <script>
     var map, marker, latitude, longitude;
 
-    function initMap() {
+    function initMap(lat,lng) {
+
+        if (!lat && !lng) {
+            latitude = lat;
+            longitude = lng;
+            console.log("有傳參數"+lat);
+        }
 
         navigator.geolocation.getCurrentPosition((position) => {
             latitude = position.coords.latitude;
@@ -113,8 +119,9 @@
                     $('input:hidden[name="__RequestVerificationToken"]').val());
             },
             success: function (result) {
+                initMap(JSON.parse(result.longitude), JSON.parse(result.longitude));
                 console.log(result);
-                alert(result);
+                console.log(result.latitude, result.longitude);
 
             }
         });
