@@ -62,16 +62,16 @@ namespace Salmon.Models
         public class Close
         {
             [JsonProperty("day")]
-            public decimal day { get; set; }
+            public decimal Day { get; set; }
             [JsonProperty("time")]
-            public bool time { get; set; }
+            public bool Time { get; set; }
         }
         public class Open
         {
             [JsonProperty("day")]
-            public decimal day { get; set; }
+            public decimal Day { get; set; }
             [JsonProperty("time")]
-            public bool time { get; set; }
+            public bool Time { get; set; }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 
 namespace Salmon.Models
@@ -34,7 +33,7 @@ namespace Salmon.Models
         public string Website { get; set; }
 
         [JsonProperty("types")]
-        public List<string>Types { get; set; }
+        public List<string> Types { get; set; }
 
         [JsonProperty("business_status")]
         public string BusinessStatus { get; set; }
@@ -57,52 +56,58 @@ namespace Salmon.Models
         [JsonProperty("opening_hours")]
         public OpeningHour OpeningHours { get; set; }
 
-        
-
         [JsonProperty("place_id")]
         public string Place_id { get; set; }
 
         [JsonProperty("vicinity")]
         public string Vicinity { get; set; }
     }
+
     public class Geometry
     {
         [JsonProperty("location")]
         public Location Location { get; set; }
+
         [JsonProperty("viewport")]
         public object Viewport { get; set; }
     }
+
     public class Review
     {
         [JsonProperty("author_name")]
-        public string author_name { get; set; }
-        [JsonProperty("author_url")]
-        public string author_url { get; set; }
-        [JsonProperty("language")]
-        public string language { get; set; }
-        [JsonProperty("profile_photo_url")]
-        public string profile_photo_url { get; set; }
-        [JsonProperty("rating")]
-        public decimal rating { get; set; }
-        [JsonProperty("relative_time_description")]
-        public string relative_time_description { get; set; }
-        [JsonProperty("text")]
-        public string text { get; set; }
-        [JsonProperty("time")]
-        public decimal time { get; set; }
+        public string AuthorName { get; set; }
 
+        [JsonProperty("author_url")]
+        public string AuthorUrl { get; set; }
+
+        [JsonProperty("language")]
+        public string Language { get; set; }
+
+        [JsonProperty("profile_photo_url")]
+        public string ProfilePhotoUrl { get; set; }
+
+        [JsonProperty("rating")]
+        public decimal Rating { get; set; }
+
+        [JsonProperty("relative_time_description")]
+        public string RelativeTimeDescription { get; set; }
+
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("time")]
+        public decimal Time { get; set; }
     }
 
     public class AddressComponent
     {
         [JsonProperty("long_name")]
-        public string long_name { get; set; }
+        public string LongName { get; set; }
+
         [JsonProperty("short_name")]
-        public string short_name { get; set; }
+        public string ShortName { get; set; }
+
         [JsonProperty("types")]
-        public List<string> types { get; set; }
-        
+        public List<string> Types { get; set; }
     }
-
-
 }
