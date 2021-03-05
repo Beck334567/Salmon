@@ -31,19 +31,13 @@ namespace Salmon.Pages
             //Todo : Let fields can be selected
             var basicApiUrl = $"https://maps.googleapis.com/maps/api/place/details/json?key={Key}&";
             var placeDetailApiUrl = basicApiUrl + "&" +
-                                    $"place_id={placeId}&fields=name,reviews,rating,website,formatted_phone_number,geometry";
+                                    $"place_id={placeId}&fields=name,reviews,rating,website,formatted_phone_number";
             try
             {
                 var response = CallGoogleMapAsync(placeDetailApiUrl);
                 var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response.Result);
-                var result = new
-                {
-                    responsePlaceDetail.Result.Geometry.Location.Latitude,
-                    responsePlaceDetail.Result.Geometry.Location.Longitude,
-                    responsePlaceDetail.Result
-                };
 
-                return new JsonResult(result);
+                return new JsonResult(responsePlaceDetail.Result.Reviews);
             }
             catch (HttpRequestException exception)
             {
@@ -81,7 +75,8 @@ namespace Salmon.Pages
                     var a = responsePlace.Results.Where(x =>
                         Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)).ToList();
                     var b = RandomSelect(a);
-                    var c = new List<Result> {b};
+                    var c = new List<Result>();
+                    c.Add(b);
                     return new JsonResult(c);
                 }
 
