@@ -30,18 +30,18 @@ namespace Salmon.Pages
         {
             //Todo : Let fields can be selected
             var basicApiUrl = string.Format("https://maps.googleapis.com/maps/api/place/details/json?key={0}&", _key);
-            var placeDetailApiUrl = basicApiUrl + "&" + string.Format("place_id={0}&fields={1}", placeId, "name,reviews,rating,website,formatted_phone_number");
+            var placeDetailApiUrl = basicApiUrl + "&" + string.Format("place_id={0}&fields={1}",
+                placeId, "name,reviews,rating,website,formatted_phone_number");
             try
             {
-                HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
-                HttpResponseMessage responseMessage = await myAppHTTPClient.PostAsync(placeDetailApiUrl, httpRequestMessage.Content);
-                HttpContent content = responseMessage.Content;
-                var response = await content.ReadAsStringAsync();
-                var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response);
-
                
 
-                return new JsonResult(responsePlaceDetail);
+                
+                var response = CallGoogleMapAsync(placeDetailApiUrl);
+                var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response.Result);
+
+              
+                return new JsonResult(responsePlaceDetail.Result.Reviews);
             }
             catch (HttpRequestException exception)
             {
@@ -50,12 +50,22 @@ namespace Salmon.Pages
             return Content(placeId);
         }
 
+        private async Task<string> CallGoogleMapAsync(string googleApi)
+        {
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage();
+            HttpResponseMessage responseMessage = await myAppHTTPClient.PostAsync(googleApi, httpRequestMessage.Content);
+            HttpContent content = responseMessage.Content;
+            var response = content.ReadAsStringAsync();
+            return await response;
+        }
+
         //Index?handler=SearchItem
         public async Task<IActionResult> OnPostSearchItemAsync(RequestPlace requestPlace)
         {
             //TODO add other's fields to select
             var basicApiUrl = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/json?key={0}", _key);
-            var nearbySearchApiUrl = basicApiUrl + "&" + string.Format("location={0},{1}&radius={2}&keyword={3}&language=zh-TW", requestPlace.Location.Latitude, requestPlace.Location.Longitude, requestPlace.Radius, requestPlace.Name);
+            var nearbySearchApiUrl = basicApiUrl + "&" + string.Format("location={0},{1}&radius={2}&keyword={3}&language=zh-TW",
+                requestPlace.Location.Latitude, requestPlace.Location.Longitude, requestPlace.Radius, requestPlace.Name);
 
             try
             {
@@ -65,7 +75,9 @@ namespace Salmon.Pages
                 var response = await content.ReadAsStringAsync();
                 var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response);
                 
-                var result = responsePlace.Results.Where(x => Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)).Select(x => new
+                var result = responsePlace.Results
+                    .Where(x => Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating))
+                    .Select(x => new
                 {
                     x.Name,
                     x.Rating,

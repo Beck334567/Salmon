@@ -21,13 +21,13 @@
 
     <form method="post">
         搜尋項目 :
-        <input placeholder="飲料店" id="searchName" value="" required />
+        <input placeholder="飲料店" id="searchName" value="" required="required" />
         <br />
         搜尋範圍(m) :
-        <input placeholder="500" id="searchRadius" value="" required />
+        <input placeholder="500" type="number" id="searchRadius" value="" required="required" />
         <br />
         分數 :
-        <input placeholder="4" id="searchRating" value="" required />
+        <input placeholder="4" type="number" id="searchRating" value="" required="required" min="1"max="5" />
         <br />
         <input type="button" value="Submit" onclick="ajaxCall()">
     </form>
@@ -110,7 +110,8 @@
                     $('input:hidden[name="__RequestVerificationToken"]').val());
             },
             success: function (result) {
-                alert(placeId);
+                console.log(result);
+                alert(result);
 
             }
         });
