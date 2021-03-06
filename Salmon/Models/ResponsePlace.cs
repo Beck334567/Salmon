@@ -47,7 +47,7 @@ namespace Salmon.Models
     public class OpeningHour
     {
         [JsonProperty("open_now")]
-        public bool OpenNow { get; set; }
+        public bool? IsOpenNow { get; set; }
         [JsonProperty("periods")]
         public List<Period> Periods { get; set; }
         

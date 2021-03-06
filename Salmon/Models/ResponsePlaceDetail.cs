@@ -57,7 +57,7 @@ namespace Salmon.Models
         public OpeningHour OpeningHours { get; set; }
 
         [JsonProperty("place_id")]
-        public string Place_id { get; set; }
+        public string PlaceId { get; set; }
 
         [JsonProperty("vicinity")]
         public string Vicinity { get; set; }

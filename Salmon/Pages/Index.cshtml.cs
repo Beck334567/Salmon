@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.FlowAnalysis;
 
 namespace Salmon.Pages
 {
@@ -36,7 +37,7 @@ namespace Salmon.Pages
             var response = CallGoogleMapAsync(placeDetailApiUrl);
             var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response.Result);
 
-            return new JsonResult(responsePlaceDetail.Result.Geometry);
+            return new JsonResult(responsePlaceDetail.Result);
         }
 
         //Index?handler=SearchItem
@@ -51,14 +52,19 @@ namespace Salmon.Pages
             var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response.Result);
 
             var result = responsePlace.Results
-                        .Where(x => (Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)) && (Convert.ToDecimal(x.UserRatingsTotal) >= Convert.ToDecimal(requestPlace.UserRatingsTotal)))
+                        .Where(x => 
+                            (Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)) && 
+                            (Convert.ToDecimal(x.UserRatingsTotal) >= Convert.ToDecimal(requestPlace.UserRatingsTotal)) &&
+                            (x.OpeningHours?.IsOpenNow != null) && 
+                            (x.OpeningHours.IsOpenNow==requestPlace.IsOpenNow))
                         .Select(x => new
                         {
                             x.Name,
                             x.Rating,
                             x.PlaceId,
                             x.UserRatingsTotal,
-                            x.Vicinity
+                            x.Vicinity,
+                            x.OpeningHours,
                         }).OrderByDescending(x => x.Rating)
                       .ThenByDescending(x => x.UserRatingsTotal);
             if (isRandomSelect)

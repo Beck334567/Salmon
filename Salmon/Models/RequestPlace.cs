@@ -15,6 +15,7 @@ namespace Salmon.Models
         public Location Location { get; set; }
         public string Rating { get; set; }
         public decimal UserRatingsTotal { get; set; }
+        public bool IsOpenNow { get; set; }
 
     }
     public class Location
