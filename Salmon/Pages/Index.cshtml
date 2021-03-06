@@ -24,7 +24,7 @@
         <input placeholder="飲料店" id="searchName" value="" required="required" />
         <br />
         搜尋範圍(m) :
-        <input placeholder="500" type="number" id="searchRadius" value="" required="required" />
+        <input placeholder="500" type="number" id="searchRadius" value="" required="required" min="1" />
         <br />
         分數 :
         <input placeholder="4" type="number" id="searchRating" value="" required="required" min="1" max="5" />
@@ -37,7 +37,7 @@
         <input type="button" value="RandomSelect" onclick="searchItem(true)">
     </form>
 
-    <div id="out"></div>
+    <div id="location"></div>
     <div id="searchResult"></div>
     <div id="map"></div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8AdwlyUEKwmtWK8K9pS3_mcyUWeSfPek&callback=initMap&libraries=&v=weekly" async></script>
@@ -58,9 +58,9 @@
                     center: { lat: latitude, lng: longitude }
                 });
 
-            var output = document.getElementById("out");
-            output.innerHTML = '<p>Latitude is : ' + position.coords.latitude + '° <br>Longitude is : ' + position.coords.longitude + '°</p>';
-
+            var locations = document.getElementById("location");
+            locations.innerHTML = '<p">Latitude is : ' + position.coords.latitude + '° <br>Longitude is : ' + position.coords.longitude + '°</p>';
+            
             marker = new google.maps.Marker({
                 position: { lat: latitude, lng: longitude },
                 map: map
@@ -70,6 +70,7 @@
 </script>
 
 <script>
+
     function searchItem(isRandomSelect) {
         var location = { Latitude: latitude, Longitude: longitude };
         var searchItems = { UserRatingsTotal: document.getElementById('searchUserRatingsTotal').value,Name: document.getElementById('searchName').value, Radius: document.getElementById('searchRadius').value, Location: location, Rating: document.getElementById('searchRating').value };
@@ -98,6 +99,7 @@
                 });
 
                 searchResults.innerHTML = '<p>' + info + '</p>';
+               
             }
         });
     }
@@ -113,10 +115,25 @@
                     $('input:hidden[name="__RequestVerificationToken"]').val());
             },
             success: function (result) {
-                console.log(result);
-                alert(result);
-
+                refreshMap(result.location.latitude, result.location.longitude);
             }
+        });
+    }
+
+    function refreshMap(newLatitude, newLongitude) {
+
+        map = new google.maps.Map(document.getElementById('map'),
+            {
+                zoom: 14,
+                center: { lat: parseFloat(newLatitude), lng: parseFloat(newLongitude) }
+            });
+
+        var output = document.getElementById("location");
+        output.innerHTML = '<p>Latitude is : ' + parseFloat(newLatitude) + '° <br>Longitude is : ' + parseFloat(newLongitude) + '°</p>';
+            
+        marker = new google.maps.Marker({
+            position: { lat: parseFloat(newLatitude), lng: parseFloat(newLongitude) },
+            map: map
         });
     }
 </script>

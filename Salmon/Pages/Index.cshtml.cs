@@ -31,19 +31,12 @@ namespace Salmon.Pages
             //Todo : Let fields can be selected
             var basicApiUrl = $"https://maps.googleapis.com/maps/api/place/details/json?key={Key}&";
             var placeDetailApiUrl = basicApiUrl + "&" +
-                                    $"place_id={placeId}&fields=name,reviews,rating,website,formatted_phone_number";
-            try
-            {
-                var response = CallGoogleMapAsync(placeDetailApiUrl);
-                var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response.Result);
+                                    $"place_id={placeId}&fields=name,reviews,rating,website,formatted_phone_number,geometry";
 
-                return new JsonResult(responsePlaceDetail.Result.Reviews);
-            }
-            catch (HttpRequestException exception)
-            {
-                Console.WriteLine("An HTTP request exception occurred. {0}", exception.Message);
-            }
-            return Content(placeId);
+            var response = CallGoogleMapAsync(placeDetailApiUrl);
+            var responsePlaceDetail = JsonConvert.DeserializeObject<ResponsePlaceDetail>(response.Result);
+
+            return new JsonResult(responsePlaceDetail.Result.Geometry);
         }
 
         //Index?handler=SearchItem
@@ -54,40 +47,31 @@ namespace Salmon.Pages
             var nearbySearchApiUrl = basicApiUrl + "&" +
                                      $"location={requestPlace.Location.Latitude},{requestPlace.Location.Longitude}&radius={requestPlace.Radius}&keyword={requestPlace.Name}&language=zh-TW";
 
-            try
-            {
-                var response = CallGoogleMapAsync(nearbySearchApiUrl);
-                var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response.Result);
+            var response = CallGoogleMapAsync(nearbySearchApiUrl);
+            var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response.Result);
 
-                var result = responsePlace.Results
-                            .Where(x => (Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)) && (Convert.ToDecimal(x.UserRatingsTotal) >= Convert.ToDecimal(requestPlace.UserRatingsTotal)))
-                            .Select(x => new
-                            {
-                                x.Name,
-                                x.Rating,
-                                x.PlaceId,
-                                x.UserRatingsTotal,
-                                x.Vicinity
-                            }).OrderByDescending(x => x.Rating)
-                          .ThenByDescending(x => x.UserRatingsTotal);
-                if (isRandomSelect)
-                {
-                    var a = responsePlace.Results.Where(x =>
-                        Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)).ToList();
-                    var b = RandomSelect(a);
-                    var c = new List<Result>();
-                    c.Add(b);
-                    return new JsonResult(c);
-                }
-
-                return new JsonResult(result);
-            }
-            catch (HttpRequestException exception)
+            var result = responsePlace.Results
+                        .Where(x => (Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)) && (Convert.ToDecimal(x.UserRatingsTotal) >= Convert.ToDecimal(requestPlace.UserRatingsTotal)))
+                        .Select(x => new
+                        {
+                            x.Name,
+                            x.Rating,
+                            x.PlaceId,
+                            x.UserRatingsTotal,
+                            x.Vicinity
+                        }).OrderByDescending(x => x.Rating)
+                      .ThenByDescending(x => x.UserRatingsTotal);
+            if (isRandomSelect)
             {
-                Console.WriteLine("An HTTP request exception occurred. {0}", exception.Message);
+                var a = responsePlace.Results.Where(x =>
+                    Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)).ToList();
+                var b = RandomSelect(a);
+                var c = new List<Result>();
+                c.Add(b);
+                return new JsonResult(c);
             }
 
-            return Content(nearbySearchApiUrl);
+            return new JsonResult(result);
         }
 
         private async Task<string> CallGoogleMapAsync(string googleApi)
