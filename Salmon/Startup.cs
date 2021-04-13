@@ -30,6 +30,8 @@ namespace Salmon
             services.AddAntiforgery(o => o.HeaderName = "X-CSRF-TOKEN");
             services.AddRazorPages();
             services.AddHttpClient();
+            //when project run can edit
+            services.AddRazorPages().AddRazorRuntimeCompilation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -25,13 +25,28 @@ namespace Salmon.Pages
         public void OnGet()
         {
         }
+        //Index?handler=GetDistance
+        // API DOC{https://developers.google.com/maps/documentation/distance-matrix/overview?hl=zh_TW#status-codes}
+        public IActionResult OnPostGetDistance(RequestDistance requestDistance)
+        {
+            //Todo : Let fields can be selected (travel model)
+            //Todo : Let origins and Destinations  be list
+            var basicApiUrl = $"https://maps.googleapis.com/maps/api/distancematrix/json?key={Key}&";
+            var GetDistanceApiUrl = basicApiUrl +
+                                    $"origins={requestDistance.Origins.Latitude+','+ requestDistance.Origins.Longitude}&destinations={requestDistance.Destinations.Latitude+','+ requestDistance.Destinations.Longitude}";
 
+            var response = CallGoogleMapAsync(GetDistanceApiUrl);
+            var responseDistance = new { ResponseDistance = JsonConvert.DeserializeObject<ResponseDistance>(response.Result) } ;
+            
+            return new JsonResult(responseDistance);
+        }
         //Index?handler=SearchDetail
         public IActionResult OnPostSearchDetail(string placeId)
         {
             //Todo : Let fields can be selected
             var basicApiUrl = $"https://maps.googleapis.com/maps/api/place/details/json?key={Key}&";
-            var placeDetailApiUrl = basicApiUrl + "&" +
+        
+            var placeDetailApiUrl = basicApiUrl  +
                                     $"place_id={placeId}&fields=name,reviews,rating,website,formatted_phone_number,geometry";
 
             var response = CallGoogleMapAsync(placeDetailApiUrl);
@@ -44,9 +59,12 @@ namespace Salmon.Pages
         public IActionResult OnPostSearchItem(RequestPlace requestPlace, bool isRandomSelect)
         {
             //TODO add other's fields to select
-            var basicApiUrl = $"https://maps.googleapis.com/maps/api/place/nearbysearch/json?key={Key}";
-            var nearbySearchApiUrl = basicApiUrl + "&" +
-                                     $"location={requestPlace.Location.Latitude},{requestPlace.Location.Longitude}&radius={requestPlace.Radius}&keyword={requestPlace.Name}&language=zh-TW";
+            var basicApiUrl = $"https://maps.googleapis.com/maps/api/place/nearbysearch/json?key={Key}&";
+            var nearbySearchApiUrl = basicApiUrl  +
+                                     $"location={requestPlace.Location.Latitude},{requestPlace.Location.Longitude}&" +
+                                     $"radius={requestPlace.Radius}&" +
+                                     $"keyword={requestPlace.Name}&" +
+                                     "language=zh-TW";
 
             var response = CallGoogleMapAsync(nearbySearchApiUrl);
             var responsePlace = JsonConvert.DeserializeObject<ResponsePlace>(response.Result);
@@ -55,7 +73,6 @@ namespace Salmon.Pages
                         .Where(x => 
                             (Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)) && 
                             (Convert.ToDecimal(x.UserRatingsTotal) >= Convert.ToDecimal(requestPlace.UserRatingsTotal)) &&
-                            (x.OpeningHours?.IsOpenNow != null) && 
                             (x.OpeningHours.IsOpenNow==requestPlace.IsOpenNow))
                         .Select(x => new
                         {
@@ -69,8 +86,11 @@ namespace Salmon.Pages
                       .ThenByDescending(x => x.UserRatingsTotal);
             if (isRandomSelect)
             {
-                var a = responsePlace.Results.Where(x =>
-                    Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)).ToList();
+                var a = responsePlace.Results
+                        .Where(x =>
+                            (Convert.ToDecimal(x.Rating) >= Convert.ToDecimal(requestPlace.Rating)) &&
+                            (Convert.ToDecimal(x.UserRatingsTotal) >= Convert.ToDecimal(requestPlace.UserRatingsTotal)) &&
+                            (x.OpeningHours.IsOpenNow == requestPlace.IsOpenNow)).ToList();
                 var b = RandomSelect(a);
                 var c = new List<Result>();
                 c.Add(b);

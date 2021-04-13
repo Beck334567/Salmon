@@ -16,13 +16,15 @@ namespace Salmon.Models
 
         [JsonProperty("status")]
         public string Status { get; set; }
-
     }
 
     public class Result
     {
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("geometry")]
+        public Geometry Geometry { get; set; }
 
         [JsonProperty("place_id")]
         public string PlaceId { get; set; }
@@ -41,21 +43,22 @@ namespace Salmon.Models
 
         [JsonProperty("types")]
         public List<string> PlaceTypes { get; set; }
-
     }
-
+    
     public class OpeningHour
     {
         [JsonProperty("open_now")]
         public bool? IsOpenNow { get; set; }
+
         [JsonProperty("periods")]
         public List<Period> Periods { get; set; }
-        
     }
+
     public class Period
     {
         [JsonProperty("close")]
         public Close CloseTime { get; set; }
+
         [JsonProperty("open")]
         public Open OpenTime { get; set; }
 
@@ -63,13 +66,16 @@ namespace Salmon.Models
         {
             [JsonProperty("day")]
             public decimal Day { get; set; }
+
             [JsonProperty("time")]
             public bool Time { get; set; }
         }
+
         public class Open
         {
             [JsonProperty("day")]
             public decimal Day { get; set; }
+
             [JsonProperty("time")]
             public bool Time { get; set; }
         }

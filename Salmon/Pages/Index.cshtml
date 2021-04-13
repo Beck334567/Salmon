@@ -30,121 +30,21 @@
         <input placeholder="4" type="number" id="searchRating" value="" required="required" min="1" max="5" />
         <br />
         評論人數 :
-        <input placeholder="4" type="number" id="searchUserRatingsTotal" value="" required="required" min="1"  />
+        <input placeholder="4" type="number" id="searchUserRatingsTotal" value="" required="required" min="1" />
         <br />
         營業中 :
-        <input type="checkbox"  id="searchIsOpenNow" value="IsOpenNow" />
+        <input type="checkbox" id="searchIsOpenNow" value="IsOpenNow" />
         <br />
         <input type="button" value="Search" onclick="searchItem(false)">
         <br />
         <input type="button" value="RandomSelect" onclick="searchItem(true)">
     </form>
+    <input type="button" value="GetDistance" onclick="GetDistance()">
 
     <div id="location"></div>
+    <div id="newLocation"></div>
     <div id="searchResult"></div>
     <div id="map"></div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8AdwlyUEKwmtWK8K9pS3_mcyUWeSfPek&callback=initMap&libraries=&v=weekly" async></script>
 </body>
 
-<script>
-    var map, marker, latitude, longitude;
-
-    function initMap() {
-
-        navigator.geolocation.getCurrentPosition((position) => {
-            latitude = position.coords.latitude;
-            longitude = position.coords.longitude;
-
-            map = new google.maps.Map(document.getElementById('map'),
-                {
-                    zoom: 15,
-                    center: { lat: latitude, lng: longitude }
-                });
-
-            var locations = document.getElementById("location");
-            locations.innerHTML = '<p">Latitude is : ' + position.coords.latitude + '° <br>Longitude is : ' + position.coords.longitude + '°</p>';
-            
-            marker = new google.maps.Marker({
-                position: { lat: latitude, lng: longitude },
-                map: map
-            });
-        });
-    }
-</script>
-
-<script>
-
-    function searchItem(isRandomSelect) {
-        var location = { Latitude: latitude, Longitude: longitude };
-        var searchItems = {
-            UserRatingsTotal: document.getElementById('searchUserRatingsTotal').value,
-            Name: document.getElementById('searchName').value,
-            Radius: document.getElementById('searchRadius').value,
-            Location: location, Rating: document.getElementById('searchRating').value,
-            IsOpenNow: document.getElementById('searchIsOpenNow').checked
-        };
-
-        $.ajax({
-            type: "post",
-            url: "Index?handler=SearchItem",
-            data: { requestPlace: searchItems, isRandomSelect: isRandomSelect },
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader("X-CSRF-TOKEN",
-                    $('input:hidden[name="__RequestVerificationToken"]').val());
-            },
-            success: function(result) {
-                var searchResults = document.getElementById("searchResult");
-                var info = "沒有查詢到項目";
-                if (result.length===0) {
-                    alert(info);
-                }
-
-                result.forEach(function (item) {
-                    info += `Name : ${item.name}<br>
-                             Rating : ${item.rating}<br>
-                             UserRatingsTotal : ${item.userRatingsTotal}<br>
-                             Open : ${item.openingHours.isOpenNow}<br>
-                             <span style="display:none">PlaceId : ${item.placeId}</span>
-                             Vicinity : ${item.vicinity}  <input type="button" value="Search" onclick="searchDetail('${item.placeId}')"><br><br>`;
-                });
-
-                searchResults.innerHTML = '<p>' + info + '</p>';
-               
-            }
-        });
-    }
-
-    function searchDetail(placeId) {
-        console.log(placeId);
-        $.ajax({
-            type: "post",
-            url: "Index?handler=SearchDetail",
-            data: { placeId: placeId },
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("X-CSRF-TOKEN",
-                    $('input:hidden[name="__RequestVerificationToken"]').val());
-            },
-            success: function (result) {
-
-                refreshMap(result.geometry.location.latitude, result.geometry.location.longitude);
-            }
-        });
-    }
-
-    function refreshMap(newLatitude, newLongitude) {
-
-        map = new google.maps.Map(document.getElementById('map'),
-            {
-                zoom: 14,
-                center: { lat: parseFloat(newLatitude), lng: parseFloat(newLongitude) }
-            });
-
-        var output = document.getElementById("location");
-        output.innerHTML = '<p>Latitude is : ' + parseFloat(newLatitude) + '° <br>Longitude is : ' + parseFloat(newLongitude) + '°</p>';
-            
-        marker = new google.maps.Marker({
-            position: { lat: parseFloat(newLatitude), lng: parseFloat(newLongitude) },
-            map: map
-        });
-    }
-</script>
